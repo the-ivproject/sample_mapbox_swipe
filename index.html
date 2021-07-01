@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Swipe between maps</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
+
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-compare/v0.4.0/mapbox-gl-compare.js"></script>
+    <link rel="stylesheet"
+        href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-compare/v0.4.0/mapbox-gl-compare.css"
+        type="text/css">
+
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50%;
+        }
+
+        #overlay-left {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 400px;
+            height: 400px;
+            z-index: 1;
+            pointer-events: none;
+            margin: -190px 0 0 -200px;
+        }
+
+        #before,
+        #after {
+            z-index: -999;
+        }
+
+        .base {
+            box-shadow: 0 0 0 1000px rgb(255 255 255 / 70%);
+            border-radius: 3px;
+            border: 7px solid #000;
+        }
+
+        .gold {
+            box-shadow: 0 0 0 1000px #000;
+            border: 8px solid #c8b674;
+            border-radius: 10px;
+        }
+
+        /* Pattern styles */
+        .left-half {
+            background-color: #ff9e2c;
+            float: left;
+            width: 50%;
+        }
+
+        .right-half {
+            background-color: #b6701e;
+            float: left;
+            width: 50%;
+        }
+
+        .mapboxgl-ctrl-geocoder {
+            min-width: 100%;
+        }
+
+        #geocoder {
+            height: 50px;
+            z-index: 9999;
+            background-color: white;
+            margin: auto;
+            position: absolute;
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .mapboxgl-ctrl-geocoder {
+            max-width: 100% !important;
+            width: 50% !important;
+
+        }
+    </style>
+</head>
+
+<body>
+
+    <section class="container">
+        <div class="left-half">
+            <article>
+                <h1>Left Half</h1>
+                <p>Weekends don't count unless you spend them doing something completely pointless.</p>
+            </article>
+        </div>
+        <div class="right-half">
+            <div id="geocoder">
+
+
+            </div>
+            <pre id="result"></pre>
+            <div id="comparison-container">
+
+                <div id="before" class="map">
+                    <div id="overlay-left" class="base"></div>
+                </div>
+                <div id="after" class="map">
+                    <div id="overlay-left" class="gold"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Load the `mapbox-gl-geocoder` plugin. -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.min.js">
+    </script>
+    <link rel="stylesheet"
+        href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.0/mapbox-gl-geocoder.css"
+        type="text/css">
+
+    <!-- Promise polyfill script is required -->
+    <!-- to use Mapbox GL Geocoder in IE 11. -->
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/es6-promise@4/dist/es6-promise.auto.min.js"></script>
+    <script>
+        let center = [-105.0070615788248, 39.75533791230949]
+        let zoomLv = 14
+        mapboxgl.accessToken =
+            'pk.eyJ1IjoiaXZwcm9qZWN0IiwiYSI6ImNrcDZuMjZvajAzZDAyd3BibDJvNmJ4bjMifQ.5FpaSBhuOWEDm3m8PQp3Zg';
+        let beforeMap = new mapboxgl.Map({
+            container: 'before',
+            style: 'mapbox://styles/ivproject/ckqkqizbn4kun18pecz954k66',
+            center: center,
+            zoom: zoomLv
+        });
+
+        let afterMap = new mapboxgl.Map({
+            container: 'after',
+            style: 'mapbox://styles/ivproject/ckqknmu3i13op17lfm0neyoy3',
+            center: center,
+            zoom: zoomLv
+        });
+
+        // A selector or reference to HTML element
+        let container = '#comparison-container';
+
+        let map = new mapboxgl.Compare(beforeMap, afterMap, container, {
+            // Set this to enable comparing two maps by mouse movement:
+            // mousemove: true
+        });
+        // Add the control to the map.
+        // Add zoom and rotation controls to the map.
+        afterMap.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+        beforeMap.addControl(new mapboxgl.NavigationControl(), 'bottom-right');
+
+        let geocoder = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            types: 'country,region,place,postcode,locality,neighborhood'
+        });
+
+        geocoder.addTo('#geocoder');
+        // Add geocoder result to container.
+        geocoder.on('result', function (e) {
+            results.innerText = JSON.stringify(e.result, null, 2);
+        });
+
+        // Clear results container when search is cleared.
+        geocoder.on('clear', function () {
+            results.innerText = '';
+        });
+    </script>
+
+</body>
+
+</html>
